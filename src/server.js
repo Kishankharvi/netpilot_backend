@@ -12,12 +12,31 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 // Middleware
+// app.use(
+//   cors({
+//     origin: process.env.FRONTEND_URL || "http://localhost:5173",
+//     credentials: true,
+//   }),
+// )
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://gilded-snickerdoodle-3b2e89.netlify.app", // ✅ Make sure no trailing slash
+];
+
+// ✅ Middleware: CORS (dynamic origin check)
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like Postman or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
-  }),
-)
+  })
+);
+
 app.use(express.json())
 
 // In-memory storage (replace with database in production)
