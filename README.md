@@ -1,5 +1,3 @@
-# netpilot_backend
-
 
 # netpilot_backend
 
