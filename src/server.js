@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   }),
 )
@@ -147,7 +147,7 @@ app.use((error, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Pentesting Backend Server running on port ${PORT}`)
-  console.log(`📊 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:3000"}`)
+  console.log(`📊 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:5173"}`)
   console.log(`🔧 API Health: http://localhost:${PORT}/api/health`)
   console.log(`🤖 Gemini API: ${process.env.GEMINI_API_KEY ? "✅ Connected" : "❌ Not configured"}`)
 })
