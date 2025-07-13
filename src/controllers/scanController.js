@@ -294,6 +294,101 @@ router.get("/:id", (req, res) => {
 
 //   res.status(201).json(newScan)
 // })
+// router.post("/start", async (req, res) => {
+//   const { target, scanType, description } = req.body
+  
+//   if (!target) {
+//     return res.status(400).json({ error: "Target is required" })
+//   }
+
+//   // Comprehensive IP and domain validation regex (matching frontend)
+//   const ipOrDomainRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?=.{1,253}$)(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.[a-zA-Z0-9-]{1,63})+$/
+
+//   // Clean the target input
+//   const cleanTarget = target.trim()
+  
+//   if (!ipOrDomainRegex.test(cleanTarget)) {
+//     console.log("❌ Failing validation:", cleanTarget)
+//     return res.status(400).json({
+//       error: "Invalid target format. Please provide a valid IP address or domain name.",
+//     })
+//   }
+
+//   // Additional validation helpers
+//   const isValidIP = (ip) => {
+//     const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+//     return ipRegex.test(ip)
+//   }
+
+//   const isValidDomain = (domain) => {
+//     const domainRegex = /^(?=.{1,253}$)(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.[a-zA-Z0-9-]{1,63})+$/
+//     return domainRegex.test(domain)
+//   }
+
+//   // Validate specific format
+//   if (!isValidIP(cleanTarget) && !isValidDomain(cleanTarget)) {
+//     console.log("❌ Target failed specific validation:", cleanTarget)
+//     return res.status(400).json({
+//       error: "Please enter a valid IP address (e.g., 192.168.1.1) or domain name (e.g., example.com)",
+//     })
+//   }
+
+//   // Optional: Add security checks for private/reserved IPs
+//   const isPrivateIP = (ip) => {
+//     if (!isValidIP(ip)) return false
+//     const parts = ip.split('.').map(Number)
+//     return (
+//       (parts[0] === 10) ||
+//       (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
+//       (parts[0] === 192 && parts[1] === 168) ||
+//       (parts[0] === 127) || // localhost
+//       (parts[0] === 169 && parts[1] === 254) // link-local
+//     )
+//   }
+
+//   // Log validation success
+//   console.log("✅ Target validation passed:", cleanTarget)
+//   console.log("Target type:", isValidIP(cleanTarget) ? "IP Address" : "Domain Name")
+  
+//   if (isValidIP(cleanTarget) && isPrivateIP(cleanTarget)) {
+//     console.log("ℹ️  Private IP address detected:", cleanTarget)
+//   }
+
+//   const scanId = uuidv4()
+//   const newScan = {
+//     id: scanId,
+//     target: cleanTarget, // Use cleaned target
+//     scanType: scanType || "basic",
+//     description: description || "",
+//     status: "initializing",
+//     progress: 0,
+//     currentStep: "Preparing scan configuration...",
+//     createdAt: new Date().toISOString(),
+//     vulnerabilities: [],
+//     metadata: {
+//       userAgent: req.get("User-Agent"),
+//       clientIP: req.ip,
+//       targetType: isValidIP(cleanTarget) ? "ip" : "domain",
+//       isPrivateTarget: isValidIP(cleanTarget) ? isPrivateIP(cleanTarget) : false,
+//       scanConfiguration: {
+//         type: scanType || "basic",
+//         timeout: 300,
+//         maxPorts: scanType === "comprehensive" ? 65535 : 1000,
+//       },
+//     },
+//   }
+
+//   // Continue with your scan logic here...
+//   console.log("🚀 Starting scan:", newScan)
+  
+//   // Return success response
+//   res.status(200).json({
+//     success: true,
+//     scanId: scanId,
+//     message: "Scan started successfully",
+//     scan: newScan
+//   })
+// })
 router.post("/start", async (req, res) => {
   const { target, scanType, description } = req.body
   
@@ -301,16 +396,32 @@ router.post("/start", async (req, res) => {
     return res.status(400).json({ error: "Target is required" })
   }
 
-  // Comprehensive IP and domain validation regex (matching frontend)
+  // Clean the target input and extract domain/IP from URL if needed
+  let cleanTarget = target.trim()
+  
+  // If it looks like a URL, extract just the domain/IP part
+  if (cleanTarget.includes('://')) {
+    try {
+      const url = new URL(cleanTarget)
+      cleanTarget = url.hostname
+    } catch (e) {
+      console.log("❌ Invalid URL format:", cleanTarget)
+      return res.status(400).json({
+        error: "Invalid URL format. Please provide a valid IP address, domain name, or URL.",
+      })
+    }
+  } else if (cleanTarget.includes('/')) {
+    // If it contains a path but no protocol, extract just the domain part
+    cleanTarget = cleanTarget.split('/')[0]
+  }
+  
+  // Comprehensive IP and domain validation regex
   const ipOrDomainRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?=.{1,253}$)(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.[a-zA-Z0-9-]{1,63})+$/
-
-  // Clean the target input
-  const cleanTarget = target.trim()
   
   if (!ipOrDomainRegex.test(cleanTarget)) {
     console.log("❌ Failing validation:", cleanTarget)
     return res.status(400).json({
-      error: "Invalid target format. Please provide a valid IP address or domain name.",
+      error: "Invalid target format. Please provide a valid IP address, domain name, or URL.",
     })
   }
 
@@ -389,7 +500,6 @@ router.post("/start", async (req, res) => {
     scan: newScan
   })
 })
-
 
 // Stop/Cancel scan
 router.post("/:id/stop", (req, res) => {
