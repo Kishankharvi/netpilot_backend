@@ -216,7 +216,8 @@ app.use(express.json())
 
 // In-memory global state
 
-
+global.scans = null;
+global.reports = null;
 app.use("/api/scans", scanController)
 app.use("/api/reports", reportController)
 
