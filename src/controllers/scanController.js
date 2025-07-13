@@ -259,9 +259,10 @@ router.post("/start", async (req, res) => {
   const targetRegex = new RegExp(
   /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/
 );
-console.log("❌ Failing validation:", target);
+
 
   if (!targetRegex.test(target)) {
+    console.log("❌ Failing validation:", target);
     return res.status(400).json({ error: "Invalid target format. Please provide a valid IP address or domain name." })
   }
 
