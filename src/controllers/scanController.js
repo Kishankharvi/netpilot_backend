@@ -256,8 +256,9 @@ router.post("/start", async (req, res) => {
     return res.status(400).json({ error: "Target is required" })
   }
 
-  // Basic target validation
-  const targetRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?=.{1,253}$)((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,}$/;
+  const targetRegex = new RegExp(
+  /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/
+);
 
   if (!targetRegex.test(target)) {
     return res.status(400).json({ error: "Invalid target format. Please provide a valid IP address or domain name." })
