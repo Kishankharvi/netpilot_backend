@@ -3,13 +3,13 @@ const { v4: uuidv4 } = require("uuid")
 const geminiService = require("../services/geminiService")
 const router = express.Router()
 
-// Get all reports
-router.get("/", (req, res) => {
+
+router.get("/", (req, res) => {   //get all the reports
   res.json(global.reports)
 })
 
-// Get specific report
-router.get("/:id", (req, res) => {
+
+router.get("/:id", (req, res) => {                      //to accesss a specific report
   const report = global.reports.find((r) => r.id === req.params.id)
   if (!report) {
     return res.status(404).json({ error: "Report not found" })
@@ -17,8 +17,7 @@ router.get("/:id", (req, res) => {
   res.json(report)
 })
 
-// Generate AI report
-router.post("/generate", async (req, res) => {
+router.post("/generate", async (req, res) => {                     // to generate a report using AI
   const { scanId } = req.body
 
   if (!scanId) {
@@ -37,7 +36,7 @@ router.post("/generate", async (req, res) => {
   try {
     console.log(`📄 Generating AI report for scan: ${scanId}`)
 
-    // Generate AI analysis
+  
     const analysis = await geminiService.analyzeVulnerabilities(scan.vulnerabilities, scan.target)
     const executiveSummary = await geminiService.generateExecutiveSummary({
       target: scan.target,
@@ -96,7 +95,7 @@ router.post("/generate", async (req, res) => {
     }
 
     global.reports.push(report)
-    console.log(`✅ Report generated successfully: ${report.id}`)
+    console.log(`Report generated successfully: ${report.id}`)
 
     res.status(201).json(report)
   } catch (error) {
@@ -190,14 +189,14 @@ function generateNextSteps(vulnerabilities) {
   return steps
 }
 
-// Export report as PDF (placeholder)
+// Export report as PDF 
 router.get("/:id/export/pdf", (req, res) => {
   const report = global.reports.find((r) => r.id === req.params.id)
   if (!report) {
     return res.status(404).json({ error: "Report not found" })
   }
 
-  // In a real implementation, this would generate a PDF
+  
   res.json({
     message: "PDF export functionality would be implemented here",
     report: report,
