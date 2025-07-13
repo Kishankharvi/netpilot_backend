@@ -215,8 +215,7 @@ app.use(
 app.use(express.json())
 
 // In-memory global state
-global.scans = []
-global.reports = []
+
 
 app.use("/api/scans", scanController)
 app.use("/api/reports", reportController)
